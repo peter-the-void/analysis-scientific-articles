@@ -1,8 +1,22 @@
 import urllib.request
-import urllib.error
 from bs4 import BeautifulSoup
-import threading
+
+
 _url = 'http://cyberleninka.ru/article'
+
+
+class Article:
+
+	def __init__(self,url):
+		soup = BeautifulSoup(get_html(url))
+
+		for point in soup.find_all('p', itemprop='description'): self.summary = point.get_text()
+		for point in soup.find_all('p', itemprop='articleBody'): self.body = point.get_text()
+		for point in soup.find_all('span', itemprop='headline'): self.head = point.get_text()
+
+	def serialize(self):
+		return {'head': self.head, 'body': self.body, 'summary': self.summary}
+
 
 def get_html(url):
 	response = urllib.request.urlopen(url)
@@ -11,8 +25,7 @@ def get_html(url):
 
 def get_number_of_last_page(url):
 	soup = BeautifulSoup(get_html(url))
-	for link in soup.find_all('a',class_='last link-page'):
-		return int(link.get('page'))
+	for link in soup.find_all('a',class_='last link-page'): return int(link.get('page'))
 
 
 def parse_category(url):
@@ -35,17 +48,3 @@ def get_articles_urls(url):
 			articles_urls.append(art_links)
 		print(url+'/'+str(i))
 	return articles_urls
-
-
-def parse_articles(urls_list):
-	pass
-
-
-def main():
-	q = parse_category(_url)
-	print(get_articles_urls(q[0][1]))
-
-
-if __name__ == '__main__':
-	main()
-
